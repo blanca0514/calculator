@@ -10,16 +10,58 @@ import UIKit
 
 class ViewController: UIViewController {
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+    private var brain = CalculatorBrain()
+    var isTypingDigit = false
+
+    @IBOutlet weak var display: UILabel!
+
+    var displayValue: Double{
+        get {
+            if display.text!.hasSuffix(".") {
+                display.text!.append("0")  // fix the value's format for compute
+            }
+            return Double(display.text!)!
+        }
+
+        set {
+            let newIntValue = Int(newValue)
+            if Double(newIntValue) == newValue {
+                display.text = String(newIntValue)
+            } else {
+                display.text = String(newValue)
+            }
+        }
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    @IBAction func touchDigit(_ sender: UIButton) {
+        let digit = sender.currentTitle!
+        if isTypingDigit {
+            display.text!.append(digit)
+        } else {
+            display.text = digit
+            isTypingDigit = true
+        }
     }
 
+    @IBAction func touchDot(_ sender: UIButton) {
+        if isTypingDigit == false || display!.text == nil {
+            display.text = "0."
+            isTypingDigit = true
+        } else if !display.text!.contains("."){
+            display.text!.append(".")
+        }
+    }
 
+    @IBAction func performOperation(_ sender: UIButton) {
+        if isTypingDigit {
+            brain.setOperand(displayValue)
+            isTypingDigit = false
+        }
+        if let mathematicalSymbol = sender.currentTitle {
+            brain.performOperation(mathematicalSymbol)
+        }
+        if let result = brain.result{
+            displayValue = result
+        }
+    }
 }
-
